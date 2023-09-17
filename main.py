@@ -1,68 +1,61 @@
 """
-Hauptmodul für das Lösen der Schrödinger-Gleichung für verschiedene Szenarien.
-Dieses Modul liest Eingabedateien, löst die Gleichung und speichert die Ergebnisse.
+Main module for solving the Schrödinger equation for various scenarios.
+This module reads input files, solves the equation, and saves the results.
 """
 
 import os
 import argparse
 import numpy as np
-from solver import main_solver_with_expvalues
+from solver import solve_schrodinger_equation
 
 
-def save_to_file(filename, data):
-    """Speichert die Daten in einer Datei."""
-    np.savetxt(filename, data)
+def save_data_to_file(filename, data_array):
+    """Saves the data to a file."""
+    np.savetxt(filename, data_array)
 
 
-def main(args):
-    """Hauptfunktion, die Szenarien bearbeitet und Daten speichert."""
-    scenarios = main_solver_with_expvalues(args.dir, args.input)
-    print(f"Processing {len(scenarios)} scenarios...")
-    for idx, (x_vals,
-            potential,
-            selected_eigenvalues,
-            selected_eigenvectors) in enumerate(scenarios, start=1):
-        scenario_dir = os.path.join(args.dir, f"scenario_{idx}")
-        os.makedirs(scenario_dir, exist_ok=True)
+def process_and_save_scenarios(arguments):
+    """Main function that processes scenarios and saves the data."""
+    all_scenarios = solve_schrodinger_equation(arguments.directory, arguments.input_file)
+    print(f"Processing {len(all_scenarios)} scenarios...")
+    for index, (position_values,
+                potential_values,
+                eigenvalues,
+                eigenvectors) in enumerate(all_scenarios, start=1):
+        scenario_directory = os.path.join(arguments.directory, f"scenario_{index}")
+        os.makedirs(scenario_directory, exist_ok=True)
 
-        save_to_file(f"{scenario_dir}/potential.dat", np.column_stack((x_vals, potential)))
-        save_to_file(f"{scenario_dir}/energies.dat", selected_eigenvalues)
+        file_path = f"{scenario_directory}/potential.dat"
+        stacked_data = np.column_stack((position_values, potential_values))
+        save_data_to_file(file_path, stacked_data)
+
+        save_data_to_file(f"{scenario_directory}/energies.dat", eigenvalues)
 
         # Create a single wavefuncs.dat file for all eigenfunctions
-        eigenvectors_list = [
-        selected_eigenvectors[:, i]
-        for i in range(selected_eigenvectors.shape[1])
+        eigenvectors_data = [
+            eigenvectors[:, i]
+            for i in range(eigenvectors.shape[1])
         ]
-        wavefuncs_data = np.column_stack([x_vals] + eigenvectors_list)
-        save_to_file(f"{scenario_dir}/wavefuncs.dat", wavefuncs_data)
+        wavefunctions_data = np.column_stack([position_values] + eigenvectors_data)
+        save_data_to_file(f"{scenario_directory}/wavefuncs.dat", wavefunctions_data)
 
 
-def main_cli():
-    """CLI-Handler für das Hauptmodul."""
-    description_text = "Solve Schrödinger equation for various scenarios."
-    parser = argparse.ArgumentParser(description=description_text)
-    argument_name = "--dir"
-    argument_type = str
-    default_value = "."
-    help_text = "Directory to save the output. Default is the current directory."
+def main_command_line_interface():
+    """CLI handler for the main module."""
+    description = "Solves the Schrödinger equation for various scenarios."
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument("--directory",
+                        type=str,
+                        default=".",
+                        help="Directory to save the output. Default is the current directory.")
+    parser.add_argument("--input_file",
+                        type=str,
+                        required=True,
+                        help="Input file containing the scenarios.")
+    parsed_args = parser.parse_args()
 
-    parser.add_argument(argument_name,
-                    type=argument_type,
-                    default=default_value,
-                    help=help_text)
-    argument_name = "--input"
-    argument_type = str
-    required_value = True
-    help_text = "Input file containing the scenarios."
-
-    parser.add_argument(argument_name,
-                    type=argument_type,
-                    required=required_value,
-                    help=help_text)
-    args = parser.parse_args()
-
-    main(args)
+    process_and_save_scenarios(parsed_args)
 
 
 if __name__ == "__main__":
-    main_cli()
+    main_command_line_interface()

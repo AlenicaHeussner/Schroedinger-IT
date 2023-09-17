@@ -1,5 +1,5 @@
 """
-Modul zum Lösen der Schrödinger-Gleichung für verschiedene Szenarien.
+Module for solving the Schrödinger equation across different scenarios.
 """
 
 import os
@@ -8,163 +8,178 @@ import numpy as np
 from scipy.interpolate import interp1d, CubicSpline
 from scipy.linalg import eigh_tridiagonal
 
-def load_input_data(filename):
-    """Lädt Eingabedaten aus einer Datei und gibt eine Liste von Szenarien zurück."""
-    scenarios = []
+def load_scenarios_from_file(filename):
+    """Loads input data from a file and returns a list of scenarios."""
+    loaded_scenarios = []
 
     with open(filename, 'r', encoding="utf-8") as file:
         while True:
-            description = None
-            while not description:
+            scenario_description = None
+            while not scenario_description:
                 line = file.readline()
                 if not line:
-                    return scenarios
-                description = line.strip().split("#")[0]
+                    return loaded_scenarios
+                scenario_description = line.strip().split("#")[0]
 
-            mass_line = file.readline().strip().split("#")[0]
-            mass = float(mass_line)
+            particle_mass = float(file.readline().strip().split("#")[0])
+            line_content = file.readline().strip()
+            cleaned_content = line_content.split("#")[0]
+            split_values = cleaned_content.split()
+            x_range_min, x_range_max, num_points = map(float, split_values)
 
-            x_params_line = file.readline().strip().split("#")[0]
-            x_min, x_max, n_points = map(float, x_params_line.split())
+            line_content = file.readline().strip()
+            cleaned_content = line_content.split("#")[0]
+            split_values = cleaned_content.split()
+            starting_eigenvalue, ending_eigenvalue = map(int, split_values)
 
-            eigenvalues_line = file.readline().strip().split("#")[0]
-            first_eigenvalue, last_eigenvalue = map(int, eigenvalues_line.split())
+            interp_method = file.readline().strip().split("#")[0].lower().strip()
+            num_interp_points = int(file.readline().strip().split("#")[0])
 
-            interpolation_type_line = file.readline().strip().split("#")[0]
-            interpolation_type = interpolation_type_line.lower().strip()
+            interp_data_points = []
+            for _ in range(num_interp_points):
+                data_point = tuple(map(float, file.readline().strip().split("#")[0].split()))
+                interp_data_points.append(data_point)
 
-            num_interpolation_points_line = file.readline().strip().split("#")[0]
-            num_interpolation_points = int(num_interpolation_points_line)
+            scenario_data = (
+                particle_mass,
+                x_range_min,
+                x_range_max,
+                num_points,
+                starting_eigenvalue,
+                ending_eigenvalue,
+                interp_method,
+                interp_data_points)
+            loaded_scenarios.append(scenario_data)
 
-            interpolation_data = []
-            for _ in range(num_interpolation_points):
-                data_line = file.readline().strip().split("#")[0]
-                data_point = tuple(map(float, data_line.split()))
-                interpolation_data.append(data_point)
+def create_potential_from_data(x_values, interpolation_method, interpolation_points):
+    """Generates a potential based on given interpolation data."""
+    x_data_points, y_data_points = zip(*interpolation_points)
 
-            scenario = (
-                mass,
-                x_min,
-                x_max,
-                n_points,
-                first_eigenvalue,
-                last_eigenvalue,
-                interpolation_type,
-                interpolation_data)
-            scenarios.append(scenario)
+    if interpolation_method == 'linear':
+        interp_kind = 'linear'
+        interp_fill_value = "extrapolate"
+        potential_function = interp1d(x_data_points,
+                                     y_data_points,
+                                     kind=interp_kind,
+                                     fill_value=interp_fill_value)
 
-def generate_potential(x_value, interpolation_type, interpolation_data):
-    """Generiert ein Potential basierend auf gegebenen Interpolationsdaten."""
-    x_data, y_data = zip(*interpolation_data)
+    elif interpolation_method == 'cspline':
+        potential_function = CubicSpline(x_data_points, y_data_points, extrapolate=True)
+    elif interpolation_method == 'polynomial':
+        interp_kind = len(x_data_points) - 1
+        interp_fill_value = "extrapolate"
 
-    if interpolation_type == 'linear':
-        interpolator = interp1d(x_data, y_data, kind='linear', fill_value="extrapolate")
-    elif interpolation_type == 'cspline':
-        interpolator = CubicSpline(x_data, y_data, extrapolate=True)
-    elif interpolation_type == 'polynomial':
-        interpolator = interp1d(x_data, y_data, kind=len(x_data) - 1, fill_value="extrapolate")
+        potential_function = interp1d(
+            x_data_points,
+            y_data_points,
+            kind=interp_kind,
+            fill_value=interp_fill_value
+        )
+
     else:
-        raise ValueError(f"Unknown interpolation type: {interpolation_type}")
+        raise ValueError(f"Unknown interpolation type: {interpolation_method}")
 
-    return interpolator(x_value)
+    return potential_function(x_values)
 
-def main_solver_with_expvalues(directory, input_file):
-    """Hauptfunktion zum Lösen der Schrödinger-Gleichung."""
-    scenarios = load_input_data(input_file)
-    results = []
+def solve_schrodinger_equation(output_directory, input_filename):
+    """Main function for solving the Schrödinger equation."""
+    scenarios = load_scenarios_from_file(input_filename)
+    computed_results = []
 
-    for index, scenario in enumerate(scenarios, start=1):
+    for index, scenario_data in enumerate(scenarios, start=1):
         (
-        mass,
-        x_min,
-        x_max,
-        n_points,
-        first_eigenvalue,
-        last_eigenvalue,
-        interpolation_type,
-        interpolation_data
-        ) = scenario
+        particle_mass,
+        x_min_range,
+        x_max_range,
+        num_of_points,
+        start_eigenvalue,
+        end_eigenvalue,
+        interp_method,
+        interp_data_points
+        ) = scenario_data
 
-        x_values = np.linspace(x_min, x_max, int(n_points))
-        potential = generate_potential(x_values, interpolation_type, interpolation_data)
+        position_values = np.linspace(x_min_range, x_max_range, int(num_of_points))
+        potential_values = create_potential_from_data(
+            position_values,
+            interp_method,
+            interp_data_points
+        )
 
-        delta_x = x_values[1] - x_values[0]
-        main_diag = potential + 1.0 / (mass * delta_x**2)
-        off_diag = -0.5 / (mass * delta_x**2) * np.ones_like(x_values[:-1])
 
-        eigenvalues, eigenvectors = eigh_tridiagonal(main_diag, off_diag)
+        delta_x = position_values[1] - position_values[0]
+        main_diag = potential_values + 1.0 / (particle_mass * delta_x**2)
+        off_diag_values = -0.5 / (particle_mass * delta_x**2) * np.ones_like(position_values[:-1])
 
-        selected_eigenvalues = eigenvalues[first_eigenvalue-1:last_eigenvalue]
-        selected_eigenvectors = eigenvectors[:, first_eigenvalue-1:last_eigenvalue]
+        computed_eigenvalues, computed_eigenvectors = eigh_tridiagonal(main_diag, off_diag_values)
+
+        selected_eigenvalues = computed_eigenvalues[start_eigenvalue-1:end_eigenvalue]
+        selected_eigenvectors = computed_eigenvectors[:, start_eigenvalue-1:end_eigenvalue]
         for i in range(selected_eigenvectors.shape[1]):
-            norm = np.sqrt(np.trapz(selected_eigenvectors[:, i]**2, x_values))
-            selected_eigenvectors[:, i] /= norm
+            norm_factor = np.sqrt(np.trapz(selected_eigenvectors[:, i]**2, position_values))
+            selected_eigenvectors[:, i] /= norm_factor
 
-        exp_values = []
+        expected_values = []
         for i in range(len(selected_eigenvalues)):
-            wave_function = selected_eigenvectors[1:-1, i]
-            x_values_interior = x_values[1:-1]
-            integrand = wave_function * x_values_interior * wave_function
-            expectation_x = np.trapz(integrand, x_values_interior)
-            integrand_x2 = wave_function * (x_values_interior**2) * wave_function
-            expectation_x2 = np.trapz(integrand_x2, x_values_interior)
+            eigen_function = selected_eigenvectors[1:-1, i]
+            interior_position_values = position_values[1:-1]
+            integrand_for_exp_x = eigen_function * interior_position_values * eigen_function
+            exp_x = np.trapz(integrand_for_exp_x, interior_position_values)
+            integrand_for_exp_x2 = eigen_function * (interior_position_values**2) * eigen_function
+            exp_x2 = np.trapz(integrand_for_exp_x2, interior_position_values)
 
-            sigma_x = np.sqrt(expectation_x2 - expectation_x**2)
-            exp_values.append((expectation_x, sigma_x))
+            sigma_x = np.sqrt(exp_x2 - exp_x**2)
+            expected_values.append((exp_x, sigma_x))
 
-        scenario_dir = os.path.join(directory, f"scenario_{index}")
-        os.makedirs(scenario_dir, exist_ok=True)
+        scenario_output_dir = os.path.join(output_directory, f"scenario_{index}")
+        os.makedirs(scenario_output_dir, exist_ok=True)
 
         # Save the potential values to a file
-        file_path = os.path.join(scenario_dir, "potential.dat")
-        data_to_save = np.column_stack([x_values, potential])
-        np.savetxt(file_path, data_to_save)
+        potential_file_path = os.path.join(scenario_output_dir, "potential.dat")
+        potential_data_to_save = np.column_stack([position_values, potential_values])
+        np.savetxt(potential_file_path, potential_data_to_save)
 
         # Save the eigenvalues to a file
-        np.savetxt(os.path.join(scenario_dir, "energies.dat"), selected_eigenvalues)
+        np.savetxt(os.path.join(scenario_output_dir, "energies.dat"), selected_eigenvalues)
 
         # Save the eigenvectors to a file
-        eigenvectors_list = [
+        eigenvectors_data_list = [
         selected_eigenvectors[:, i]
         for i in range(selected_eigenvectors.shape[1])
         ]
-        wavefuncs_data = np.column_stack([x_values] + eigenvectors_list)
-        np.savetxt(os.path.join(scenario_dir, "wavefuncs.dat"), wavefuncs_data)
+        wavefunctions_combined_data = np.column_stack([position_values] + eigenvectors_data_list)
+        np.savetxt(os.path.join(scenario_output_dir, "wavefuncs.dat"), wavefunctions_combined_data)
 
-        # Save the exp_values to a file
-        expvalues_file_path = os.path.join(scenario_dir, "expvalues.dat")
-        np.savetxt(expvalues_file_path, exp_values)
+        # Save the expected values to a file
+        expvalues_file_path = os.path.join(scenario_output_dir, "expvalues.dat")
+        np.savetxt(expvalues_file_path, expected_values)
 
-        results.append((x_values, potential, selected_eigenvalues, selected_eigenvectors))
+        computed_results.append(
+            (
+                position_values,
+                potential_values,
+                selected_eigenvalues,
+                selected_eigenvectors
+            )
+        )
 
-    return results
 
-def main_cli():
-    """CLI-Funktion für die Ausführung des Solvers."""
+    return computed_results
+
+def command_line_interface():
+    """CLI function for executing the solver."""
     description_text = "Solve Schrödinger equation for various scenarios."
     parser = argparse.ArgumentParser(description=description_text)
-    argument_name = "--dir"
-    argument_type = str
-    default_value = "."
-    help_text = "Directory to save the output. Default is the current directory."
+    parser.add_argument("--directory",
+                        type=str,
+                        default=".",
+                        help="Directory to save the output. Default is the current directory.")
+    parser.add_argument("--input",
+                        type=str,
+                        required=True,
+                        help="Input file containing the scenarios.")
+    parsed_arguments = parser.parse_args()
 
-    parser.add_argument(argument_name,
-                    type=argument_type,
-                    default=default_value,
-                    help=help_text)
-
-    argument_name = "--input"
-    argument_type = str
-    required_value = True
-    help_text = "Input file containing the scenarios."
-
-    parser.add_argument(argument_name,
-                    type=argument_type,
-                    required=required_value,
-                    help=help_text)
-    args = parser.parse_args()
-
-    main_solver_with_expvalues(args.dir, args.input)
+    solve_schrodinger_equation(parsed_arguments.directory, parsed_arguments.input)
 
 if __name__ == "__main__":
-    main_cli()
+    command_line_interface()
