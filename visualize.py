@@ -8,188 +8,250 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 
-def load_numerical_data_from_file(file_path):
+def load_data(filename):
     """
     Load numerical data from a given file.
     
     Parameters:
-    - file_path (str): The path to the file to load.
+    - filename (str): The path to the file to load.
     
     Returns:
     - ndarray: A numpy array containing the loaded data.
     """
-    return np.loadtxt(file_path)
+    return np.loadtxt(filename)
 
-def visualize_schrodinger_results(
-    data_directory,
-    save_as_pdf,
-    wavefunc_scale,
-    x_limits_left_graph,
-    x_limits_right_graph,
-    y_limits
-):
-
+def visualize_data(directory, save_pdf, scale_factor, xlim_left, xlim_right, ylim):
     """
     Visualize the potential, eigenstates, and expected values.
     
     The function plots the potential, eigenstates, and expected values based on data
-    loaded from the given directory. The visualization can be adjusted using provided arguments.
+    loaded from given directory. The visualization can be adjusted using provided arguments.
     
     Parameters:
-    - data_directory (str): Directory containing the data files.
-    - save_as_pdf (bool): If True, save the plot as a PDF, otherwise display the plot.
-    - wavefunc_scale (float): Factor to scale the wavefunctions for visualization.
-    - x_limits_left_graph (tuple): Limits for the x-axis of the left graph.
-    - x_limits_right_graph (tuple): Limits for the x-axis of the right graph.
-    - y_limits (tuple): Limits for the y-axis.
+    - directory (str): Directory containing the data files.
+    - save_pdf (bool): If True, save the plot as a PDF, otherwise display the plot.
+    - scale_factor (float): Factor to scale the wavefunctions for visualization.
+    - xlim_left (tuple): Limits for the x-axis of the left graph.
+    - xlim_right (tuple): Limits for the x-axis of the right graph.
+    - ylim (tuple): Limits for the y-axis.
     """
-    file_path = f"{data_directory}/potential.dat"
-    loaded_data = load_numerical_data_from_file(file_path)
-    position_values, potential_values = loaded_data.T
+    x_values, potential = load_data(f"{directory}/potential.dat").T
+    eigenvalues = load_data(f"{directory}/energies.dat")
+    wavefuncs = load_data(f"{directory}/wavefuncs.dat")[:, 1:]
+    expvalues = load_data(f"{directory}/expvalues.dat")
 
-    energy_values = load_numerical_data_from_file(f"{data_directory}/energies.dat")
-    wave_functions = load_numerical_data_from_file(f"{data_directory}/wavefuncs.dat")[:, 1:]
-    expected_values = load_numerical_data_from_file(f"{data_directory}/expvalues.dat")
-
-    _, (left_graph, right_graph) = plt.subplots(1, 2, figsize=(15, 6))
+    _, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
     plt.subplots_adjust(left=0.3, bottom=0.238, right=0.611, top=0.82, wspace=0.202, hspace=0.192)
 
-    left_graph.plot(position_values, potential_values, label="Potential", color="black")
+    ax1.plot(x_values, potential, label="Potential", color="black")
     colors = ["blue", "red"]  # Alternating colors for wavefunctions
-    for index, energy in enumerate(energy_values):
-        left_graph.axhline(y=energy, color='lightgray', linestyle='-', linewidth=1.5)
-        y_values_for_wavefunc = wave_functions[:, index] * wavefunc_scale + energy
-        label_for_wavefunc = f"Eigenstate {index+1}"
-        wavefunc_color = colors[index % 2]
-        left_graph.plot(position_values, y_values_for_wavefunc,
-                 label=label_for_wavefunc,
-                 color=wavefunc_color)
+    for i, eigenvalue in enumerate(eigenvalues):
+        ax1.axhline(y=eigenvalue, color='lightgray', linestyle='-', linewidth=1.5)
+        y_values = wavefuncs[:, i] * scale_factor + eigenvalue
+        label_text = f"Eigenstate {i+1}"
+        color_value = colors[i % 2]
+        ax1.plot(x_values, y_values,
+                 label=label_text,
+                 color=color_value)
 
-        left_graph.plot(expected_values[index, 0], energy, 'gx', markersize=8, markeredgewidth=1)
-    left_graph.set_title("Potential, Eigenstates, (x)")
-    left_graph.set_xlabel("x [Bohr]")
-    left_graph.set_ylabel("Energy [Hartree]")
-    if x_limits_left_graph:
-        left_graph.set_xlim(x_limits_left_graph)
-    if y_limits:
-        left_graph.set_ylim(y_limits)
+        ax1.plot(expvalues[i, 0], eigenvalue, 'gx', markersize=8, markeredgewidth=1)
+    ax1.set_title("Potential, Eigenstates, (x)")
+    ax1.set_xlabel("x [Bohr]")
+    ax1.set_ylabel("Energy [Hartree]")
+    if xlim_left:
+        ax1.set_xlim(xlim_left)
+    if ylim:
+        ax1.set_ylim(ylim)
 
-    for index, energy in enumerate(energy_values):
-        right_graph.axhline(y=energy, color='lightgray', linestyle='-', linewidth=1.5)
-    for index, sigma_value in enumerate(expected_values[:, 1]):
-        sigma_marker_color = '#FF00FF'
-        sigma_marker_style = '+'
-        sigma_marker_size = 12
-        sigma_marker_edge_width = 1.2
+    for i, eigenvalue in enumerate(eigenvalues):
+        ax2.axhline(y=eigenvalue, color='lightgray', linestyle='-', linewidth=1.5)
+    for i, sigma in enumerate(expvalues[:, 1]):
+        color_value = '#FF00FF'
+        marker_style = '+'
+        marker_size_value = 12
+        marker_edge_width = 1.2
 
-        right_graph.plot(sigma_value, energy_values[index],
-                 color=sigma_marker_color,
-                 marker=sigma_marker_style,
-                 markersize=sigma_marker_size,
-                 markeredgewidth=sigma_marker_edge_width)
+        ax2.plot(sigma, eigenvalues[i],
+                 color=color_value,
+                 marker=marker_style,
+                 markersize=marker_size_value,
+                 markeredgewidth=marker_edge_width)
 
-    right_graph.set_title("σₓ")
-    right_graph.set_xlabel("[Bohr]")
-    right_graph.set_ylim(left_graph.get_ylim())
-    right_graph.yaxis.set_ticklabels([])
-    right_graph.yaxis.set_ticks([])
-    if x_limits_right_graph:
-        right_graph.set_xlim(x_limits_right_graph)
+    ax2.set_title("σₓ")
+    ax2.set_xlabel("[Bohr]")
+    ax2.set_ylim(ax1.get_ylim())
+    ax2.yaxis.set_ticklabels([])
+    ax2.yaxis.set_ticks([])
+    if xlim_right:
+        ax2.set_xlim(xlim_right)
 
-    if save_as_pdf:
-        plt.savefig(f"{data_directory}/revised_visualization.pdf")
+    if save_pdf:
+        plt.savefig(f"{directory}/revised_visualization.pdf")
     else:
         plt.show()
 
-def command_line_interface():
+def main():
     """
     Command-line interface (CLI) for the visualization module.
     
     Parses the command-line arguments and calls the visualization function.
     """
-    parser_description = "Visualize the results from solving the Schrödinger equation."
-    parser = argparse.ArgumentParser(description=parser_description)
+    description_text = "Visualize the results from solving the Schrödinger equation."
+    parser = argparse.ArgumentParser(description=description_text)
 
-    parser.add_argument("--data_dir",
-                        default=".",
-                        help="Directory where the results are saved.")
-    parser.add_argument("--save_as_pdf",
-                        action="store_true",
-                        help="Save the visualization as a PDF instead of displaying it.")
-    parser.add_argument("--wavefunc_scale",
-                        type=float,
-                        default=1.0,
-                        help="Factor to scale the wavefunctions for better visualization.")
-    parser.add_argument("--x_limits_left_graph",
-                        nargs=2,
-                        type=float,
-                        default=[None, None],
-                        help="Limits for the x-axis of the left graph.")
-    parser.add_argument("--x_limits_right_graph",
-                        nargs=2,
-                        type=float,
-                        default=[None, None],
-                        help="Limits for the x-axis of the right graph.")
-    parser.add_argument("--y_limits",
-                        nargs=2,
-                        type=float,
-                        default=[None, None],
-                        help="Limits for the y-axis.")
-    # I've kept the tolerance arguments unchanged for brevity
-    parser.add_argument('--ytol-start',
-                        type=float,
-                        default=None,
-                        help='Tolerance for the start of the Y-axis.')
-    parser.add_argument('--ytol-end',
-                        type=float,
-                        default=None,
-                        help='Tolerance for the end of the Y-axis.')
-    parser.add_argument('--xtol-start-left',
-                        type=float,
-                        default=None,
-                        help='Tolerance for the start of the X-axis for the left plot.')
-    parser.add_argument('--xtol-end-left',
-                        type=float,
-                        default=None,
-                        help='Tolerance for the end of the X-axis for the left plot.')
-    parser.add_argument('--xtol-start-right',
-                        type=float,
-                        default=None,
-                        help='Tolerance for the start of the X-axis for the right plot.')
-    parser.add_argument('--xtol-end-right',
-                        type=float,
-                        default=None,
-                        help='Tolerance for the end of the X-axis for the right plot.')
+    argument_name = "--dir"
+    default_value = "."
+    help_text = "Directory where the results are saved."
+
+    parser.add_argument(argument_name,
+                    default=default_value,
+                    help=help_text)
+    argument_name = "--save_pdf"
+    action_value = "store_true"
+    help_text = "Save the visualization as a PDF instead of displaying it."
+
+    parser.add_argument(argument_name,
+                    action=action_value,
+                    help=help_text)
+
+    argument_name = "--scale_factor"
+    argument_type = float
+    default_value = 1.0
+    help_text = "Factor to scale the wavefunctions for better visualization."
+
+    parser.add_argument(argument_name,
+                    type=argument_type,
+                    default=default_value,
+                    help=help_text)
+
+    argument_name = "--xlim_left"
+    number_of_arguments = 2
+    argument_type = float
+    default_value = [None, None]
+    help_text = "Limits for the x-axis of the left graph."
+
+    parser.add_argument(argument_name,
+                    nargs=number_of_arguments,
+                    type=argument_type,
+                    default=default_value,
+                    help=help_text)
+
+    argument_name = "--xlim_right"
+    number_of_arguments = 2
+    argument_type = float
+    default_value = [None, None]
+    help_text = "Limits for the x-axis of the right graph."
+
+    parser.add_argument(argument_name,
+                    nargs=number_of_arguments,
+                    type=argument_type,
+                    default=default_value,
+                    help=help_text)
+
+    argument_name = "--ylim"
+    number_of_arguments = 2
+    argument_type = float
+    default_value = [None, None]
+    help_text = "Limits for the y-axis."
+
+    parser.add_argument(argument_name,
+                    nargs=number_of_arguments,
+                    type=argument_type,
+                    default=default_value,
+                    help=help_text)
+
+    argument_name = '--ytol-start'
+    argument_type = float
+    default_value = None
+    help_text = 'Tolerance for the start of the Y-axis.'
+
+    parser.add_argument(argument_name,
+                    type=argument_type,
+                    default=default_value,
+                    help=help_text)
+
+    argument_name = '--ytol-end'
+    argument_type = float
+    default_value = None
+    help_text = 'Tolerance for the end of the Y-axis.'
+
+    parser.add_argument(argument_name,
+                    type=argument_type,
+                    default=default_value,
+                    help=help_text)
+
+    argument_name = '--xtol-start-left'
+    argument_type = float
+    default_value = None
+    help_text = 'Tolerance for the start of the X-axis for the left plot.'
+
+    parser.add_argument(argument_name,
+                    type=argument_type,
+                    default=default_value,
+                    help=help_text)
+
+    argument_name = '--xtol-end-left'
+    argument_type = float
+    default_value = None
+    help_text = 'Tolerance for the end of the X-axis for the left plot.'
+
+    parser.add_argument(argument_name,
+                    type=argument_type,
+                    default=default_value,
+                    help=help_text)
+
+    argument_name = '--xtol-start-right'
+    argument_type = float
+    default_value = None
+    help_text = 'Tolerance for the start of the X-axis for the right plot.'
+
+    parser.add_argument(argument_name,
+                    type=argument_type,
+                    default=default_value,
+                    help=help_text)
+
+    argument_name = '--xtol-end-right'
+    argument_type = float
+    default_value = None
+    help_text = 'Tolerance for the end of the X-axis for the right plot.'
+
+    parser.add_argument(argument_name,
+                    type=argument_type,
+                    default=default_value,
+                    help=help_text)
+
 
     args = parser.parse_args()
 
     # Applying the tolerances
-    x_limits_left = list(args.x_limits_left_graph)
-    x_limits_right = list(args.x_limits_right_graph)
-    y_limits = list(args.y_limits)
+    xlim_left = list(args.xlim_left)
+    xlim_right = list(args.xlim_right)
+    ylim = list(args.ylim)
 
-    if x_limits_left[0] is not None and args.xtol_start_left is not None:
-        x_limits_left[0] += args.xtol_start_left
-    if x_limits_left[1] is not None and args.xtol_end_left is not None:
-        x_limits_left[1] -= args.xtol_end_left
-    if x_limits_right[0] is not None and args.xtol_start_right is not None:
-        x_limits_right[0] += args.xtol_start_right
-    if x_limits_right[1] is not None and args.xtol_end_right is not None:
-        x_limits_right[1] -= args.xtol_end_right
-    if y_limits[0] is not None and args.ytol_start is not None:
-        y_limits[0] += args.ytol_start
-    if y_limits[1] is not None and args.ytol_end is not None:
-        y_limits[1] -= args.ytol_end
+    if xlim_left[0] is not None and args.xtol_start_left is not None:
+        xlim_left[0] += args.xtol_start_left
+    if xlim_left[1] is not None and args.xtol_end_left is not None:
+        xlim_left[1] -= args.xtol_end_left
+    if xlim_right[0] is not None and args.xtol_start_right is not None:
+        xlim_right[0] += args.xtol_start_right
+    if xlim_right[1] is not None and args.xtol_end_right is not None:
+        xlim_right[1] -= args.xtol_end_right
+    if ylim[0] is not None and args.ytol_start is not None:
+        ylim[0] += args.ytol_start
+    if ylim[1] is not None and args.ytol_end is not None:
+        ylim[1] -= args.ytol_end
 
-    # Call the visualize_schrodinger_results function
-    visualize_schrodinger_results(
-        args.data_dir,
-        args.save_as_pdf,
-        args.wavefunc_scale,
-        tuple(x_limits_left),
-        tuple(x_limits_right),
-        tuple(y_limits)
-    )
+    # Call the visualize_data function
+    visualize_data(
+    args.dir,
+    args.save_pdf,
+    args.scale_factor,
+    tuple(xlim_left),
+    tuple(xlim_right),
+    tuple(ylim)
+)
+
 
 if __name__ == "__main__":
-    command_line_interface()
+    main()
+    

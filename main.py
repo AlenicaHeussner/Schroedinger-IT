@@ -6,8 +6,7 @@ This module reads input files, solves the equation, and saves the results.
 import os
 import argparse
 import numpy as np
-from solver import solve_schrodinger_equation
-
+from solver import load_scenarios_from_file, solve_schroedinger_equation
 
 def save_data_to_file(filename, data_array):
     """Saves the data to a file."""
@@ -16,12 +15,21 @@ def save_data_to_file(filename, data_array):
 
 def process_and_save_scenarios(arguments):
     """Main function that processes scenarios and saves the data."""
-    all_scenarios = solve_schrodinger_equation(arguments.directory, arguments.input_file)
-    print(f"Processing {len(all_scenarios)} scenarios...")
-    for index, (position_values,
-                potential_values,
-                eigenvalues,
-                eigenvectors) in enumerate(all_scenarios, start=1):
+    #all_scenarios = process_scenarios(arguments.directory, arguments.input_file)
+
+    scenarios = load_scenarios_from_file(arguments.input_file)
+
+    print(f"Processing {len(scenarios)} scenarios...")
+    for index, scenario_data in enumerate(scenarios, start=1):
+        scenario_output_dir = os.path.join(arguments.directory, f"scenario_{index}")
+        os.makedirs(scenario_output_dir, exist_ok=True)
+
+        (position_values,
+         potential_values,
+         expected_values,
+         eigenvalues,
+         eigenvectors) = solve_schroedinger_equation(scenario_data)
+
         scenario_directory = os.path.join(arguments.directory, f"scenario_{index}")
         os.makedirs(scenario_directory, exist_ok=True)
 
@@ -38,6 +46,10 @@ def process_and_save_scenarios(arguments):
         ]
         wavefunctions_data = np.column_stack([position_values] + eigenvectors_data)
         save_data_to_file(f"{scenario_directory}/wavefuncs.dat", wavefunctions_data)
+
+        # Save the expected values to a file
+        expvalues_file_path = os.path.join(scenario_directory, "expvalues.dat")
+        np.savetxt(expvalues_file_path, expected_values)
 
 
 def main_command_line_interface():
