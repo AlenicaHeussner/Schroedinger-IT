@@ -147,7 +147,7 @@ def command_line_interface():
                         help="Input file containing the scenarios.")
     parsed_arguments = parser.parse_args()
 
-    process_scenarios(parsed_arguments.directory, parsed_arguments.input)
+    #process_scenarios(parsed_arguments.directory, parsed_arguments.input)
 
 if __name__ == "__main__":
     command_line_interface()
