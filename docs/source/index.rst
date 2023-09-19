@@ -10,7 +10,10 @@ Welcome to Schroedinger Equation's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   main
+   solver
+   visualize
+   solver_test
 
 Indices and tables
 ==================

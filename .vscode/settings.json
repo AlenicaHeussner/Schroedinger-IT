@@ -10,5 +10,6 @@
         ".",
         "-p",
         "*_test.py"
-    ]
+    ],
+    "esbonio.sphinx.confDir": ""
 }

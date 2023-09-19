@@ -2,7 +2,6 @@
 Module for solving the Schrödinger equation across different scenarios.
 """
 
-import os
 import argparse
 import numpy as np
 from scipy.interpolate import interp1d, CubicSpline
@@ -131,7 +130,14 @@ def solve_schroedinger_equation(scenario_data) :
         sigma_x = np.sqrt(exp_x2 - exp_x**2)
         expected_values.append((exp_x, sigma_x))
 
-    return (position_values, potential_values, expected_values, selected_eigenvalues, selected_eigenvectors)
+    return (
+        position_values,
+        potential_values,
+        expected_values,
+        selected_eigenvalues,
+        selected_eigenvectors
+    )
+
 
 def command_line_interface():
     """CLI function for executing the solver."""
@@ -145,9 +151,6 @@ def command_line_interface():
                         type=str,
                         required=True,
                         help="Input file containing the scenarios.")
-    parsed_arguments = parser.parse_args()
-
-    #process_scenarios(parsed_arguments.directory, parsed_arguments.input)
 
 if __name__ == "__main__":
     command_line_interface()

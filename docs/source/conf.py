@@ -1,15 +1,9 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
+"""
+Configuration file for the Sphinx documentation builder.
 
-# -- Path setup --------------------------------------------------------------
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
+This file contains configuration settings for Sphinx, a documentation generation tool.
+It specifies project information, extensions, and other options for generating documentation.
+"""
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../..'))
@@ -17,12 +11,12 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'Schroedinger Equation'
-copyright = '2023, Oksana Bunk, Alenica Heußner'
-author = 'Oksana Bunk, Alenica Heußner'
+PROJECT = 'Schroedinger Equation'
+CUSTOM_COPYRIGHT = '2023, Oksana Bunk, Alenica Heußner'
+AUTHOR = 'Oksana Bunk, Alenica Heußner'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0'
+RELEASE = '1.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -48,7 +42,7 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+HTML_THEME = 'alabaster'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
