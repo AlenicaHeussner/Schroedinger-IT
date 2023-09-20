@@ -21,7 +21,7 @@ Provides functionalities to visualize the potential, eigenstates, and other rela
 
 1. Clone this repository:
 \```bash
-git clone https://github.com/Leni128/Schroedinger-IT
+git clone https://github.com/AlenicaHeussner/Schroedinger-IT
 \```
 
 2. Navigate to the repository directory:
