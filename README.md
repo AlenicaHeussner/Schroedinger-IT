@@ -17,6 +17,47 @@ Contains functions to test the solver's ability to load scenarios from a file an
 ### [visualize.py](./visualize.py):
 Provides functionalities to visualize the potential, eigenstates, and other related data resulting from the solution of the Schrödinger equation.
 
+## Installation
+
+1. Clone this repository:
+\```bash
+git clone https://github.com/Leni128/Schroedinger-IT
+\```
+
+2. Navigate to the repository directory:
+\```bash
+cd Schroedinger-IT
+\```
+
+3. Install the required packages:
+\```bash
+pip install numpy scipy matplotlib
+\```
+
+## Requirements
+- Python 3.x
+- NumPy
+- SciPy
+- Matplotlib
+
+## Usage
+
+### General Usage
+
+- **To solve the Schrödinger equation for given scenarios and save the results:**
+\```python
+main.py --dir . --input schrodinger.inp
+\```
+
+- **To visualize the results:**
+\```python
+visualize.py --dir ./scenario_x --xlim_left --xlim_right --ylim --scale_factor --xtol-start-left --xtol-end-left --xtol-start-right --xtol-end-right --ytol-start --ytol-end
+\```
+- **To save the visualized results as PDF:**
+\```python
+visualize.py --dir ./scenario_x --xlim_left --xlim_right --ylim --scale_factor --xtol-start-left --xtol-end-left --xtol-start-right --xtol-end-right --ytol-start --ytol-end --save_pdf
+\```
+
 **Usage for Different Scenarios:**
 
 - **Scenario 1:**
@@ -70,43 +111,6 @@ Optional flags include settings for saving plots, scaling wavefunctions, and adj
 
 - `--save_pdf`: If provided, the visualization will be saved as a PDF file.
 
-## Requirements
-- Python 3.x
-- NumPy
-- SciPy
-- Matplotlib
-
-## Installation
-
-1. Clone this repository:
-\```bash
-git clone https://github.com/Leni128/Schroedinger-IT
-\```
-
-2. Navigate to the repository directory:
-\```bash
-cd Schroedinger-IT
-\```
-
-3. Install the required packages:
-\```bash
-pip install numpy scipy matplotlib
-\```
-
-## General Usage
-- **To solve the Schrödinger equation for given scenarios and save the results:**
-\```python
-main.py --dir . --input schrodinger.inp
-\```
-
-- **To visualize the results:**
-\```python
-visualize.py --dir ./scenario_x --xlim_left --xlim_right --ylim --scale_factor --xtol-start-left --xtol-end-left --xtol-start-right --xtol-end-right --ytol-start --ytol-end
-\```
-- **To save the visualized results as PDF:**
-\```python
-python visualize.py --dir ./scenario_x --xlim_left --xlim_right --ylim --scale_factor --xtol-start-left --xtol-end-left --xtol-start-right --xtol-end-right --ytol-start --ytol-end --save_pdf
-\```
 
 ## Testing
 - **To run tests for the solver:**
