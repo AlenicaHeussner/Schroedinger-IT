@@ -1,4 +1,4 @@
-Solver Documentation
+Main Documentation
 =======================
 
 .. automodule:: main

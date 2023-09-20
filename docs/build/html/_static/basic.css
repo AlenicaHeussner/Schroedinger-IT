@@ -419,7 +419,8 @@ table caption span.caption-number {
     font-style: italic;
 }
 
-
+table caption span.caption-text {
+}
 
 table.docutils td, table.docutils th {
     padding: 1px 8px 1px 5px;
@@ -470,7 +471,8 @@ figcaption span.caption-number {
 }
 
 div.figure p.caption span.caption-text,
-
+figcaption span.caption-text {
+}
 
 /* -- field list styles ----------------------------------------------------- */
 
@@ -851,6 +853,8 @@ div.code-block-caption span.caption-number {
     font-style: italic;
 }
 
+div.code-block-caption span.caption-text {
+}
 
 div.literal-block-wrapper {
     margin: 1em 0;

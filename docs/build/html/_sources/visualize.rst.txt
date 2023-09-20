@@ -1,5 +1,5 @@
-Solver Documentation
-=======================
+Visualize Documentation
+============================
 
 .. automodule:: visualize
    :members:
