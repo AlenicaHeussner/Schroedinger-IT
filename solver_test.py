@@ -37,10 +37,10 @@ def test_scenario():
 
     print("test scenario data...")
     for i in range(1, 7):
-        with open(f'./scenario_{i}/energies.dat', 'r', encoding='utf-8') as file:
+        with open(f'./ref scenario_{i}/energies.dat', 'r', encoding='utf-8') as file:
             energies_expected = [float(line.strip()) for line in file.readlines()]
 
-        with open(f'./scenario_{i}/expvalues.dat', 'r', encoding='utf-8') as file:
+        with open(f'./ref scenario_{i}/expvalues.dat', 'r', encoding='utf-8') as file:
             expected_values = []
             for line in file:
                 stripped_line = line.strip()
@@ -50,12 +50,12 @@ def test_scenario():
 
 
         wavefunc_expected = []
-        with open(f'./scenario_{i}/wavefuncs.dat', 'r', encoding='utf-8') as file:
+        with open(f'./ref scenario_{i}/wavefuncs.dat', 'r', encoding='utf-8') as file:
             for line in file:
                 values = [float(value) for value in line.strip().split()]
                 wavefunc_expected.append(np.array(values))
 
-        with open(f'./scenario_{i}/potential.dat', 'r', encoding='utf-8') as file:
+        with open(f'./ref scenario_{i}/potential.dat', 'r', encoding='utf-8') as file:
             potentials_per_position_exp = []
             for line in file:
                 stripped_line = line.strip()
