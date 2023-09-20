@@ -88,7 +88,7 @@ visualize.py --dir ./scenario_6 --xlim_left 0 20 --xlim_right 0 3 --ylim 0 3.5 -
 
 ### Optional Flags:
 
-Optional flags include settings for saving plots, scaling wavefunctions, and adjusting visualization settings.
+**Optional flags include settings for saving plots, scaling wavefunctions, and adjusting visualization settings.**
 
 - `--xlim_left`: Defines the left boundary for the x-axis of the plot.
   
