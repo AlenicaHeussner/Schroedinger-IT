@@ -42,7 +42,7 @@ pip install numpy scipy matplotlib
 
 ## Usage
 
-### General Usage
+### General
 
 - **To solve the Schrödinger equation for given scenarios and save the results:**
 \```python
@@ -58,7 +58,7 @@ visualize.py --dir ./scenario_x --xlim_left --xlim_right --ylim --scale_factor -
 visualize.py --dir ./scenario_x --xlim_left --xlim_right --ylim --scale_factor --xtol-start-left --xtol-end-left --xtol-start-right --xtol-end-right --ytol-start --ytol-end --save_pdf
 \```
 
-**Usage for Different Scenarios:**
+### For Different Scenarios:
 
 - **Scenario 1:**
 \```python
