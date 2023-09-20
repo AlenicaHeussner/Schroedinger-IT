@@ -103,7 +103,7 @@ main.py --dir . --input schrodinger.inp
 \```python
 visualize.py --dir ./scenario_x --xlim_left --xlim_right --ylim --scale_factor --xtol-start-left --xtol-end-left --xtol-start-right --xtol-end-right --ytol-start --ytol-end
 \```
-- **To save the results as PDF:**
+- **To save the visualized results as PDF:**
 \```python
 python visualize.py --dir ./scenario_x --xlim_left --xlim_right --ylim --scale_factor --xtol-start-left --xtol-end-left --xtol-start-right --xtol-end-right --ytol-start --ytol-end --save_pdf
 \```
