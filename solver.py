@@ -82,10 +82,16 @@ def create_potential_from_data(x_values, interpolation_method, interpolation_poi
 
 
 def solve_schroedinger_equation(scenario_data) :
-    """_summary_
+    """
+    Solves the Schrödinger equation for a specified scenario.
 
     Args:
-        scenario_data (_type_): _description_
+        scenario_data (tuple): Contains data about the particle, x range, eigenvalues range,
+                               interpolation method, and data points for potential.
+
+    Returns:
+        tuple: Position values, potential values, expected values (position and sigma_x),
+               selected eigenvalues, and corresponding eigenvectors.
     """
     (
     particle_mass,
