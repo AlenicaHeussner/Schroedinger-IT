@@ -93,8 +93,8 @@ cd Schroedinger-IT
 pip install numpy scipy matplotlib
 \```
 
-## Usage
-To solve the Schrödinger equation for given scenarios and save the results:
+## General Usage
+- **To solve the Schrödinger equation for given scenarios and save the results:**
 \```python
 main.py --dir . --input schrodinger.inp
 \```
@@ -109,7 +109,7 @@ python visualize.py --dir ./scenario_x --xlim_left --xlim_right --ylim --scale_f
 \```
 
 ## Testing
-To run tests for the solver:
+- **To run tests for the solver:**
 \```python
 python3 -m pytest
 \```
