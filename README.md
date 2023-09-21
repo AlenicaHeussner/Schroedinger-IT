@@ -115,6 +115,6 @@ visualize.py --dir ./scenario_6 --xlim_left 0 20 --xlim_right 0 3 --ylim 0 3.5 -
 
 ## Testing
 - **To run tests for the solver:**
-\```python
-python3 -m pytest
+\```python3
+-m pytest
 \```
